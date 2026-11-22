@@ -1,6 +1,7 @@
 package br.com.transporte.model;
 
 public class Carro extends Veiculo {
+    private static final long serialVersionUID = 1L;
     public static final double TARIFA_BASE = 5.00;
     public static final double TARIFA_POR_KM = 2.00;
 

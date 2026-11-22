@@ -1,6 +1,7 @@
 package br.com.transporte.model;
 
-public abstract class Pessoa {
+public abstract class Pessoa implements java.io.Serializable {
+    private static final long serialVersionUID = 1L;
     private final String nome;
     private final String cpf;
     private String telefone;

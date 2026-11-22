@@ -2,7 +2,7 @@ package br.com.transporte.strategy;
 
 import br.com.transporte.model.Veiculo;
 
-public interface CategoriaCorrida {
+public interface CategoriaCorrida extends java.io.Serializable {
     double aplicarAcrescimo(double valor);
 
     int getNivelMinimoVeiculo();

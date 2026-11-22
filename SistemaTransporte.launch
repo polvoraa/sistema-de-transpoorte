@@ -8,4 +8,5 @@
     </listAttribute>
     <stringAttribute key="org.eclipse.jdt.launching.MAIN_TYPE" value="br.com.transporte.app.Aplicacao"/>
     <stringAttribute key="org.eclipse.jdt.launching.PROJECT_ATTR" value="SistemaTransporte"/>
+    <stringAttribute key="org.eclipse.jdt.launching.WORKING_DIRECTORY" value="${workspace_loc:/SistemaTransporte}"/>
 </launchConfiguration>

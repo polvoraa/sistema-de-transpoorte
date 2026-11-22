@@ -1,6 +1,7 @@
 package br.com.transporte.model;
 
-public abstract class Veiculo {
+public abstract class Veiculo implements java.io.Serializable {
+    private static final long serialVersionUID = 1L;
     private final String placa;
     private final String modelo;
 

@@ -9,7 +9,8 @@ import br.com.transporte.model.Passageiro;
 import br.com.transporte.strategy.CategoriaCorrida;
 import br.com.transporte.strategy.FormaPagamento;
 
-public class GerenciadorCorridas {
+public class GerenciadorCorridas implements java.io.Serializable {
+    private static final long serialVersionUID = 1L;
     private final List<Corrida> corridas = new ArrayList<>();
     private int proximoId = 1;
 

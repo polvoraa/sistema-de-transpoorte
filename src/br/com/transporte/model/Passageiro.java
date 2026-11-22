@@ -9,6 +9,7 @@ import br.com.transporte.strategy.CategoriaCorrida;
 import br.com.transporte.strategy.FormaPagamento;
 
 public class Passageiro extends Pessoa {
+    private static final long serialVersionUID = 1L;
     private final List<Corrida> corridasSolicitadas = new ArrayList<>();
 
     public Passageiro(String nome, String cpf, String telefone) {

@@ -1,12 +1,18 @@
 package br.com.transporte.model;
 
+import br.com.transporte.exception.DistanciaInvalidaException;
+import br.com.transporte.exception.MotoristaIndisponivelException;
+import br.com.transporte.exception.VeiculoIncompativelException;
+import br.com.transporte.exception.EstadoCorridaInvalidoException;
+
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 
 import br.com.transporte.strategy.CategoriaCorrida;
 import br.com.transporte.strategy.FormaPagamento;
 
-public class Corrida {
+public class Corrida implements java.io.Serializable {
+    private static final long serialVersionUID = 1L;
     private final int id;
     private final Passageiro passageiro;
     private final String origem;
@@ -30,7 +36,7 @@ public class Corrida {
             throw new IllegalArgumentException("Passageiro, pagamento e categoria são obrigatórios");
         }
         if (!Double.isFinite(distancia) || distancia <= 0) {
-            throw new IllegalArgumentException("A distância deve ser maior que zero");
+            throw new DistanciaInvalidaException("A distância deve ser maior que zero");
         }
         this.id = id;
         this.passageiro = passageiro;
@@ -44,17 +50,18 @@ public class Corrida {
     public void aceitar(Motorista motorista) {
         exigirEstado(EstadoCorrida.SOLICITADA, "aceitar");
         if (motorista == null || !motorista.isDisponivel()) {
-            throw new IllegalStateException("O motorista deve estar disponível");
+            throw new MotoristaIndisponivelException("O motorista deve estar disponível");
         }
         if (!categoria.isCompativel(motorista.getVeiculo())) {
-            throw new IllegalStateException("O veículo do motorista não é compatível com a categoria "
+            throw new VeiculoIncompativelException("O veículo do motorista não é compatível com a categoria "
                     + categoria.getNome());
         }
+        Veiculo veiculoEscolhido = motorista.getVeiculo();
+        atualizarValores(veiculoEscolhido);
         this.motorista = motorista;
-        this.veiculo = motorista.getVeiculo();
+        this.veiculo = veiculoEscolhido;
         motorista.ficarIndisponivel();
         estado = EstadoCorrida.ACEITA;
-        calcularValor();
     }
 
     public void iniciar() {
@@ -71,7 +78,7 @@ public class Corrida {
 
     public void cancelar() {
         if (estado != EstadoCorrida.SOLICITADA && estado != EstadoCorrida.ACEITA) {
-            throw new IllegalStateException("Só é possível cancelar uma corrida solicitada ou aceita");
+            throw new EstadoCorridaInvalidoException("Só é possível cancelar uma corrida solicitada ou aceita");
         }
         if (motorista != null) {
             motorista.ficarDisponivel();
@@ -81,19 +88,25 @@ public class Corrida {
 
     public double calcularValor() {
         if (veiculo == null) {
-            throw new IllegalStateException("A corrida precisa ser aceita antes do cálculo");
+            throw new EstadoCorridaInvalidoException("A corrida precisa ser aceita antes do cálculo");
         }
-        valor = arredondar(veiculo.calcularTarifa(distancia));
-        valorFinal = arredondar(formaPagamento.aplicar(categoria.aplicarAcrescimo(valor)));
+        atualizarValores(veiculo);
         return valorFinal;
+    }
+
+    private void atualizarValores(Veiculo veiculo) {
+        double tarifa = arredondar(veiculo.calcularTarifa(distancia));
+        double total = arredondar(formaPagamento.aplicar(categoria.aplicarAcrescimo(tarifa)));
+        valor = tarifa;
+        valorFinal = total;
     }
 
     public void avaliar(int nota, String comentario) {
         if (estado != EstadoCorrida.FINALIZADA) {
-            throw new IllegalStateException("Apenas corridas finalizadas podem ser avaliadas");
+            throw new EstadoCorridaInvalidoException("Apenas corridas finalizadas podem ser avaliadas");
         }
         if (avaliacao != null) {
-            throw new IllegalStateException("A corrida já foi avaliada");
+            throw new EstadoCorridaInvalidoException("A corrida já foi avaliada");
         }
         avaliacao = new Avaliacao(nota, comentario);
         motorista.adicionarAvaliacao(avaliacao);
@@ -101,11 +114,14 @@ public class Corrida {
 
     private void exigirEstado(EstadoCorrida esperado, String acao) {
         if (estado != esperado) {
-            throw new IllegalStateException("Não é possível " + acao + " uma corrida no estado " + estado);
+            throw new EstadoCorridaInvalidoException("Não é possível " + acao + " uma corrida no estado " + estado);
         }
     }
 
     private static double arredondar(double numero) {
+        if (!Double.isFinite(numero)) {
+            throw new DistanciaInvalidaException("O valor da corrida excedeu o limite de cálculo");
+        }
         return BigDecimal.valueOf(numero).setScale(2, RoundingMode.HALF_UP).doubleValue();
     }
 

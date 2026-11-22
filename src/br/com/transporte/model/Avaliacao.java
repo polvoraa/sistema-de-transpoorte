@@ -1,12 +1,15 @@
 package br.com.transporte.model;
 
-public class Avaliacao {
+import br.com.transporte.exception.NotaInvalidaException;
+
+public class Avaliacao implements java.io.Serializable {
+    private static final long serialVersionUID = 1L;
     private final int nota;
     private final String comentario;
 
     public Avaliacao(int nota, String comentario) {
         if (nota < 1 || nota > 5) {
-            throw new IllegalArgumentException("A nota deve estar entre 1 e 5");
+            throw new NotaInvalidaException("A nota deve estar entre 1 e 5");
         }
         this.nota = nota;
         if (comentario == null) {

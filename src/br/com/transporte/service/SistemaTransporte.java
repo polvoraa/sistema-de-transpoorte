@@ -1,5 +1,8 @@
 package br.com.transporte.service;
 
+import br.com.transporte.exception.CadastroDuplicadoException;
+import br.com.transporte.exception.PassageiroNaoCadastradoException;
+
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -13,7 +16,8 @@ import br.com.transporte.strategy.CategoriaCorrida;
 import br.com.transporte.strategy.FormaPagamento;
 
 /** Mantém os cadastros da empresa; as regras de ciclo permanecem em Corrida. */
-public class SistemaTransporte {
+public class SistemaTransporte implements java.io.Serializable {
+    private static final long serialVersionUID = 1L;
     private final List<Passageiro> passageiros = new ArrayList<>();
     private final List<Motorista> motoristas = new ArrayList<>();
     private final List<Veiculo> veiculos = new ArrayList<>();
@@ -22,14 +26,14 @@ public class SistemaTransporte {
     public void cadastrarPassageiro(Passageiro passageiro) {
         if (passageiro == null) throw new IllegalArgumentException("O passageiro é obrigatório");
         if (buscarPassageiroPorCpf(passageiro.getCpf()) != null)
-            throw new IllegalArgumentException("Já existe um passageiro com este CPF");
+            throw new CadastroDuplicadoException("Já existe um passageiro com este CPF");
         passageiros.add(passageiro);
     }
 
     public void cadastrarVeiculo(Veiculo veiculo) {
         if (veiculo == null) throw new IllegalArgumentException("O veículo é obrigatório");
         if (buscarVeiculoPorPlaca(veiculo.getPlaca()) != null)
-            throw new IllegalArgumentException("Já existe um veículo com esta placa");
+            throw new CadastroDuplicadoException("Já existe um veículo com esta placa");
         veiculos.add(veiculo);
     }
 
@@ -38,7 +42,7 @@ public class SistemaTransporte {
         if (!veiculos.contains(motorista.getVeiculo()))
             throw new IllegalArgumentException("O veículo deve ser cadastrado antes do motorista");
         if (buscarMotoristaPorCpf(motorista.getCpf()) != null)
-            throw new IllegalArgumentException("Já existe um motorista com este CPF");
+            throw new CadastroDuplicadoException("Já existe um motorista com este CPF");
         boolean cnhEmUso = false;
         boolean veiculoEmUso = false;
 
@@ -52,10 +56,10 @@ public class SistemaTransporte {
         }
 
         if (cnhEmUso) {
-            throw new IllegalArgumentException("CNH já cadastrada");
+            throw new CadastroDuplicadoException("CNH já cadastrada");
         }
         if (veiculoEmUso) {
-            throw new IllegalArgumentException("Veículo já associado a outro motorista");
+            throw new CadastroDuplicadoException("Veículo já associado a outro motorista");
         }
         motoristas.add(motorista);
     }
@@ -63,7 +67,7 @@ public class SistemaTransporte {
     public Corrida solicitarCorrida(Passageiro passageiro, String origem, String destino,
             double distancia, FormaPagamento pagamento, CategoriaCorrida categoria) {
         if (!passageiros.contains(passageiro))
-            throw new IllegalArgumentException("O passageiro não está cadastrado");
+            throw new PassageiroNaoCadastradoException("O passageiro não está cadastrado");
         return passageiro.solicitarCorrida(gerenciadorCorridas, origem, destino, distancia,
                 pagamento, categoria);
     }

@@ -1,6 +1,7 @@
 package br.com.transporte.strategy;
 
 public class Conforto implements CategoriaCorrida {
+    private static final long serialVersionUID = 1L;
     public static final double ACRESCIMO = 0.20;
 
     @Override
